@@ -1,0 +1,197 @@
+package com.cursosonline.entidades;
+
+/**
+ *
+ * @author Administrador
+ */
+public class Estudiante {
+    private int id;
+    private String nombres ;
+    private String apellidos ;
+    private String email ;
+
+    public Estudiante() {
+    }
+
+    public Estudiante(int id, String nombres, String apellidos, String email) {
+        this.id = id;
+        this.nombres = nombres;
+        this.apellidos = apellidos;
+        this.email = email;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getNombres() {
+        return nombres;
+    }
+
+    public void setNombres(String nombres) {
+        this.nombres = nombres;
+    }
+
+    public String getApellidos() {
+        return apellidos;
+    }
+
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public String toString() {
+        return "Estudiante{" + "id=" + id + ", nombres=" + nombres + ", apellidos=" + apellidos + ", email=" + email + '}';
+    }
+    
+    
+}
+
+
+
+
+package com.cursosonline.dao;
+
+import com.cursosonline.entidades.Estudiante;
+import java.util.List;
+
+/**
+ *
+ * @author Administrador
+ */
+public interface EstudianteDao {
+    void ingresar(Estudiante estudiante);
+    void actualizar(Estudiante estudiante);
+    void eliminar(int id);
+    
+    List<Estudiante> getEstudiantes();
+}
+
+
+
+
+package com.cursosonline.dao;
+
+import com.cursoonline.util.util;
+import com.cursosonline.entidades.Estudiante;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ * @author Administrador
+ */
+public class EstudianteDAOimpl implements EstudianteDao {
+
+    @Override
+    public void ingresar(Estudiante estudiantes) {
+     String query="INSERT INTO public.estudiantes(nombres, apellidos, email) VALUES (?,?,?);" ;
+     Connection conn;      
+     try {
+               
+      conn = DriverManager.getConnection(util.url,util.user,util.password);
+      PreparedStatement stm = conn.prepareStatement(query);
+               stm.setString(1, estudiantes.getNombres());
+               stm.setString(2, estudiantes.getApellidos());
+               
+               stm.setString(3, estudiantes.getEmail());
+               stm.execute();
+} catch (SQLException e) {
+               e.printStackTrace();
+           }
+    }
+    @Override
+    public void actualizar(Estudiante estudiantes) {
+        
+         String query="UPDATE public.estudiantes SET  nombres=?, apellidos=?, email=? WHERE id=?;";
+           Connection conn;      
+     try {
+               
+      conn = DriverManager.getConnection(util.url,util.user,util.password);
+      PreparedStatement stm = conn.prepareStatement(query);
+               stm.setString(1, estudiantes.getNombres());
+               stm.setString(2, estudiantes.getApellidos());
+               stm.setString(3, estudiantes.getEmail());
+               stm.setInt(4, estudiantes.getId());
+               stm.execute();
+} catch (SQLException e) {
+               e.printStackTrace();
+           }
+    }
+
+    @Override
+    public void eliminar(int id) {
+         String query="DELETE FROM public.estudiantes WHERE id=?;";
+        
+              Connection conn;      
+     try {
+               
+      conn = DriverManager.getConnection(util.url,util.user,util.password);
+      PreparedStatement stm = conn.prepareStatement(query);
+               stm.setInt(1, id);
+               stm.execute();
+} catch (SQLException e) {
+               e.printStackTrace();
+           }
+    }
+    
+
+    @Override
+    public List<Estudiante> getEstudiantes() {
+        String query = " SELECT * FROM public.estudiantes:";
+        List<Estudiante> estudiantes = new ArrayList<>();
+        Connection conn;      
+     try {
+               
+      conn = DriverManager.getConnection(util.url,util.user,util.password);
+      PreparedStatement stm = conn.prepareStatement(query);
+      ResultSet rs= stm.executeQuery();
+      
+      
+      while(rs.next()){
+          Estudiante estudiante = new Estudiante(rs.getInt(1), rs.getString(2), rs.getString(3),rs.getString(4));
+                  estudiantes.add(estudiante);
+      }
+} catch (SQLException e) {
+               e.printStackTrace();
+           }
+        
+         //To change body of generated methods, choose Tools | Templates.
+        return estudiantes;
+    }
+    
+}
+
+
+
+public class Main {
+   
+       static String url="jdbc:postgresql://localhost/CursosOnline";
+       static String user="postgres";
+       static String password="1234";
+ 
+     public static void main(String[] args) {
+         
+         EstudianteDao estudianteDao= new EstudianteDAOimpl();
+         
+        estudianteDao.ingresar(new Estudiante(0,"luis","ram","skdfsj@hotmil.com"));
+         List<Estudiante> estudiantes = estudianteDao.getEstudiantes();
+         System.out.println(estudiantes);    
